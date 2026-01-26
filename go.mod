@@ -2,7 +2,10 @@ module github.com/ctykk/go-xray
 
 go 1.25.6
 
-require github.com/xtls/xray-core v1.260123.0
+require (
+	github.com/go-resty/resty/v2 v2.17.1
+	github.com/xtls/xray-core v1.260123.0
+)
 
 require (
 	github.com/andybalholm/brotli v1.0.6 // indirect
