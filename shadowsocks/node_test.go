@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
+	_ "github.com/ctykk/go-xray"
 	"github.com/ctykk/go-xray/shadowsocks"
 	"github.com/go-resty/resty/v2"
-	_ "github.com/xtls/xray-core/main/distro/all"
 )
 
 var (
@@ -21,6 +21,7 @@ func TestMain(m *testing.M) {
 	gctx, gcancel = context.WithCancel(context.Background())
 	defer gcancel()
 
+	// run: `xray -c .\node_test.config.jsonc` before test
 	os.Exit(m.Run())
 }
 
