@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/ctykk/go-xray/common"
-	"github.com/xtls/xray-core/app/dispatcher"
-	"github.com/xtls/xray-core/app/log"
 	"github.com/xtls/xray-core/app/proxyman"
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/protocol"
@@ -39,68 +37,47 @@ func New(host string, port uint16, cipher Cipher, password string, name string) 
 }
 
 func (n *Node) DialContext(ctx context.Context) (common.DialContext, error) {
-	config := core.Config{
-		App: []*serial.TypedMessage{
-			serial.ToTypedMessage(&dispatcher.Config{}),
-			serial.ToTypedMessage(&proxyman.InboundConfig{}),
-			serial.ToTypedMessage(&proxyman.OutboundConfig{}),
+	config := common.NewConfig()
 
-			// disable log
-			serial.ToTypedMessage(&log.Config{
-				AccessLogType: log.LogType_None,
-				ErrorLogType:  log.LogType_None,
-			}),
-		},
-		Outbound: []*core.OutboundHandlerConfig{{
-			ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
-				Server: &protocol.ServerEndpoint{
-					Address: net.NewIPOrDomain(net.ParseAddress(n.host)),
-					Port:    uint32(n.port),
-					User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-						CipherType: n.cipher,
-						Password:   n.password,
-					})},
-				},
-			}),
-		}},
-	}
+	config.Outbound = []*core.OutboundHandlerConfig{{
+		ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
+			Server: &protocol.ServerEndpoint{
+				Address: net.NewIPOrDomain(net.ParseAddress(n.host)),
+				Port:    uint32(n.port),
+				User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
+					CipherType: n.cipher,
+					Password:   n.password,
+				})},
+			},
+		}),
+	}}
 
-	return common.NewDialContext(ctx, &config)
+	return common.NewDialContext(ctx, config)
 }
 
 func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
-	config := core.Config{
-		App: []*serial.TypedMessage{
-			serial.ToTypedMessage(&dispatcher.Config{}),
-			serial.ToTypedMessage(&proxyman.InboundConfig{}),
-			serial.ToTypedMessage(&proxyman.OutboundConfig{}),
+	config := common.NewConfig()
 
-			// disable log
-			serial.ToTypedMessage(&log.Config{
-				AccessLogType: log.LogType_None,
-				ErrorLogType:  log.LogType_None,
-			}),
-		},
-		Outbound: []*core.OutboundHandlerConfig{{
-			ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
-				Server: &protocol.ServerEndpoint{
-					Address: net.NewIPOrDomain(net.ParseAddress(n.host)),
-					Port:    uint32(n.port),
-					User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-						CipherType: n.cipher,
-						Password:   n.password,
-					})},
-				},
-			}),
-		}},
-		Inbound: []*core.InboundHandlerConfig{{
-			ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{
-				PortList: &net.PortList{Range: []*net.PortRange{net.SinglePortRange(net.Port(port))}},
-				Listen:   net.NewIPOrDomain(net.LocalHostIP),
-			}),
-			ProxySettings: serial.ToTypedMessage(&http.ServerConfig{UserLevel: 0}),
-		}},
-	}
+	config.Outbound = []*core.OutboundHandlerConfig{{
+		ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
+			Server: &protocol.ServerEndpoint{
+				Address: net.NewIPOrDomain(net.ParseAddress(n.host)),
+				Port:    uint32(n.port),
+				User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
+					CipherType: n.cipher,
+					Password:   n.password,
+				})},
+			},
+		}),
+	}}
 
-	return common.NewHTTPProxy(ctx, &config)
+	config.Inbound = []*core.InboundHandlerConfig{{
+		ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{
+			PortList: &net.PortList{Range: []*net.PortRange{net.SinglePortRange(net.Port(port))}},
+			Listen:   net.NewIPOrDomain(net.LocalHostIP),
+		}),
+		ProxySettings: serial.ToTypedMessage(&http.ServerConfig{UserLevel: 0}),
+	}}
+
+	return common.NewHTTPProxy(ctx, config)
 }
