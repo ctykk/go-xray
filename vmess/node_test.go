@@ -1,4 +1,4 @@
-package shadowsocks_test
+package vmess_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ctykk/go-xray/shadowsocks"
+	"github.com/ctykk/go-xray/vmess"
 	"github.com/go-resty/resty/v2"
 	_ "github.com/xtls/xray-core/main/distro/all"
 )
@@ -15,7 +15,7 @@ func TestNode_DialContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	node, err := shadowsocks.New("localhost", 42665, shadowsocks.CipherAES256GCM, "123456", "TestNode_DialContext")
+	node, err := vmess.New("localhost", 39575, vmess.CipherAES128GCM, "433d0d23-d443-5212-a0df-cdbdd2d53015", "TestNode_DialContext")
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -38,12 +38,12 @@ func TestNode_HTTPProxy(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	node, err := shadowsocks.New("localhost", 42665, shadowsocks.CipherAES256GCM, "123456", "TestNode_DialContext")
+	node, err := vmess.New("localhost", 39575, vmess.CipherAES128GCM, "433d0d23-d443-5212-a0df-cdbdd2d53015", "TestNode_DialContext")
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
 
-	port := uint16(37415)
+	port := uint16(39576)
 	err = node.HTTPProxy(ctx, port)
 	if err != nil {
 		t.Fatalf("%+v", err)

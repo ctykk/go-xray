@@ -1,0 +1,25 @@
+// run: `xray -c .\node_test.config.jsonc` before test
+{
+  "log": {
+    "loglevel": "info"
+  },
+  "inbounds": [
+    {
+      "port": 39575,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "433d0d23-d443-5212-a0df-cdbdd2d53015",
+            "security": "aes-128-gcm"
+          }
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom"
+    }
+  ]
+}

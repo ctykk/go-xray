@@ -1,4 +1,4 @@
-package shadowsocks
+package vmess
 
 import (
 	"context"
@@ -8,47 +8,48 @@ import (
 	"github.com/xtls/xray-core/common/protocol"
 	"github.com/xtls/xray-core/common/serial"
 	"github.com/xtls/xray-core/core"
-	"github.com/xtls/xray-core/proxy/shadowsocks"
+	"github.com/xtls/xray-core/proxy/vmess"
+	"github.com/xtls/xray-core/proxy/vmess/outbound"
 )
 
-// Node shadowsocks
+// Node vmess
 type Node struct {
-	host     string // Server host
-	port     uint16 // Server port
-	cipher   Cipher // Encryption method
-	password string // Encryption password
+	host   string
+	port   uint16
+	cipher Cipher
+	uuid   string
 
-	Name string // Node display name
+	Name string
 
 	config *core.Config
 }
 
-// New creates a Shadowsocks node from raw config values.
-func New(host string, port uint16, cipher Cipher, password string, name string) (*Node, error) {
+func New(host string, port uint16, cipher Cipher, uuid string, name string) (*Node, error) {
 	config := common.NewConfig()
 	config.Outbound = []*core.OutboundHandlerConfig{{
-		ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
-			Server: &protocol.ServerEndpoint{
+		ProxySettings: serial.ToTypedMessage(&outbound.Config{
+			Receiver: &protocol.ServerEndpoint{
 				Address: net.NewIPOrDomain(net.ParseAddress(host)),
 				Port:    uint32(port),
-				User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-					CipherType: cipher,
-					Password:   password,
+				User: &protocol.User{Account: serial.ToTypedMessage(&vmess.Account{
+					Id:               uuid,
+					SecuritySettings: &protocol.SecurityConfig{Type: cipher},
 				})},
 			},
 		}),
 	}}
 
 	node := Node{
-		host:     host,
-		port:     port,
-		cipher:   cipher,
-		password: password,
+		host:   host,
+		port:   port,
+		cipher: cipher,
+		uuid:   uuid,
 
 		Name: name,
 
 		config: config,
 	}
+
 	return &node, nil
 }
 
