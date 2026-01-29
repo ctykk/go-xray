@@ -24,11 +24,9 @@ const (
 
 var strCipherRe = regexp.MustCompile(`[-_]`)
 
-// StrCipher parse Cipher from string
-func StrCipher(s string) (Cipher, error) {
-	s = strCipherRe.ReplaceAllString(s, "")
-	s = strings.ToLower(s)
-	switch s {
+// ParseCipher parse Cipher from string
+func ParseCipher(s string) (Cipher, error) {
+	switch strings.ToLower(strCipherRe.ReplaceAllString(s, "")) {
 	case "auto":
 		return CipherAuto, nil
 	case "aes128gcm":

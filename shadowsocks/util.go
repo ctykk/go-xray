@@ -45,7 +45,7 @@ func FromBase64(b64 string) ([]Node, error) {
 		if len(authSplit) != 2 {
 			continue
 		}
-		cipher, err := StrCipher(authSplit[0])
+		cipher, err := ParseCipher(authSplit[0])
 		if err != nil {
 			continue
 		}
