@@ -2,7 +2,6 @@ package shadowsocks
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ctykk/go-xray/common"
 	"github.com/xtls/xray-core/app/dispatcher"
@@ -103,18 +102,5 @@ func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
 		}},
 	}
 
-	instance, err := core.NewWithContext(ctx, &config)
-	if err != nil {
-		return fmt.Errorf("init instance: %w", err)
-	}
-
-	err = instance.Start()
-	if err != nil {
-		return fmt.Errorf("start instance: %w", err)
-	}
-	go func() {
-		<-ctx.Done()
-		_ = instance.Close()
-	}()
-	return nil
+	return common.NewHTTPProxy(ctx, &config)
 }
