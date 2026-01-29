@@ -36,13 +36,17 @@ func FromBase64(b64 string) ([]Node, error) {
 			continue
 		}
 
-		// cipher-type, password
+		// cipher, password
 		encodedAuth, err := base64.StdEncoding.DecodeString(match[1])
 		if err != nil {
 			return nil, err
 		}
 		authSplit := strings.SplitN(string(encodedAuth), ":", 2)
 		if len(authSplit) != 2 {
+			continue
+		}
+		cipher, err := StrCipher(authSplit[0])
+		if err != nil {
 			continue
 		}
 
@@ -52,7 +56,7 @@ func FromBase64(b64 string) ([]Node, error) {
 			continue
 		}
 
-		node, err := New(match[2], uint16(port), authSplit[0], authSplit[1], name)
+		node, err := New(match[2], uint16(port), cipher, authSplit[1], name)
 		if err != nil {
 			continue
 		}

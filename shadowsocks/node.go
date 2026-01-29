@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"strings"
 
 	"github.com/ctykk/go-xray/common"
 	"github.com/xtls/xray-core/app/dispatcher"
@@ -20,36 +19,20 @@ import (
 
 // Node shadowsocks
 type Node struct {
-	host     string                 // Server host
-	port     uint16                 // Server port
-	cipher   shadowsocks.CipherType // Encryption method
-	password string                 // Encryption password
+	host     string // Server host
+	port     uint16 // Server port
+	cipher   Cipher // Encryption method
+	password string // Encryption password
 
 	Name string // Node display name
 }
 
-const (
-	CipherNameAES128GCM = "AES-128-GCM"
-	CipherNameAES256GCM = "AES-256-GCM"
-)
-
 // New creates a Shadowsocks node from raw config values.
-func New(host string, port uint16, cipher string, password string, name string) (*Node, error) {
-	// cipher type
-	var ct shadowsocks.CipherType
-	switch strings.ToUpper(cipher) {
-	case CipherNameAES128GCM:
-		ct = shadowsocks.CipherType_AES_128_GCM
-	case CipherNameAES256GCM:
-		ct = shadowsocks.CipherType_AES_256_GCM
-	default:
-		return nil, fmt.Errorf("unknown cipher: %s", cipher)
-	}
-
+func New(host string, port uint16, cipher Cipher, password string, name string) (*Node, error) {
 	node := Node{
 		host:     host,
 		port:     port,
-		cipher:   ct,
+		cipher:   cipher,
 		password: password,
 
 		Name: name,

@@ -28,7 +28,7 @@ func TestNode_DialContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(gctx)
 	defer cancel()
 
-	node, err := shadowsocks.New("localhost", 42665, "aes-256-gcm", "123456", "TestNode_DialContext")
+	node, err := shadowsocks.New("localhost", 42665, shadowsocks.CipherAES256GCM, "123456", "TestNode_DialContext")
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -51,7 +51,7 @@ func TestNode_HTTPProxy(t *testing.T) {
 	ctx, cancel := context.WithCancel(gctx)
 	defer cancel()
 
-	node, err := shadowsocks.New("localhost", 42665, "aes-256-gcm", "123456", "TestNode_DialContext")
+	node, err := shadowsocks.New("localhost", 42665, shadowsocks.CipherAES256GCM, "123456", "TestNode_DialContext")
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
