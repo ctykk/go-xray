@@ -19,10 +19,26 @@ type Node struct {
 	password string // Encryption password
 
 	Name string // Node display name
+
+	config *core.Config
 }
 
 // New creates a Shadowsocks node from raw config values.
 func New(host string, port uint16, cipher Cipher, password string, name string) (*Node, error) {
+	config := common.NewConfig()
+	config.Outbound = []*core.OutboundHandlerConfig{{
+		ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
+			Server: &protocol.ServerEndpoint{
+				Address: net.NewIPOrDomain(net.ParseAddress(host)),
+				Port:    uint32(port),
+				User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
+					CipherType: cipher,
+					Password:   password,
+				})},
+			},
+		}),
+	}}
+
 	node := Node{
 		host:     host,
 		port:     port,
@@ -30,44 +46,16 @@ func New(host string, port uint16, cipher Cipher, password string, name string) 
 		password: password,
 
 		Name: name,
+
+		config: config,
 	}
 	return &node, nil
 }
 
 func (n *Node) DialContext(ctx context.Context) (common.DialContext, error) {
-	config := common.NewConfig()
-
-	config.Outbound = []*core.OutboundHandlerConfig{{
-		ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
-			Server: &protocol.ServerEndpoint{
-				Address: net.NewIPOrDomain(net.ParseAddress(n.host)),
-				Port:    uint32(n.port),
-				User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-					CipherType: n.cipher,
-					Password:   n.password,
-				})},
-			},
-		}),
-	}}
-
-	return common.NewDialContext(ctx, config)
+	return common.NewDialContext(ctx, n.config)
 }
 
 func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
-	config := common.NewConfig()
-
-	config.Outbound = []*core.OutboundHandlerConfig{{
-		ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
-			Server: &protocol.ServerEndpoint{
-				Address: net.NewIPOrDomain(net.ParseAddress(n.host)),
-				Port:    uint32(n.port),
-				User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-					CipherType: n.cipher,
-					Password:   n.password,
-				})},
-			},
-		}),
-	}}
-
-	return common.NewHTTPProxy(ctx, config, port)
+	return common.NewHTTPProxy(ctx, n.config, port)
 }
