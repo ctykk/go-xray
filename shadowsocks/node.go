@@ -3,13 +3,12 @@ package shadowsocks
 import (
 	"context"
 	"fmt"
-	"net"
 
 	"github.com/ctykk/go-xray/common"
 	"github.com/xtls/xray-core/app/dispatcher"
 	"github.com/xtls/xray-core/app/log"
 	"github.com/xtls/xray-core/app/proxyman"
-	net2 "github.com/xtls/xray-core/common/net"
+	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/protocol"
 	"github.com/xtls/xray-core/common/serial"
 	"github.com/xtls/xray-core/core"
@@ -56,7 +55,7 @@ func (n *Node) DialContext(ctx context.Context) (common.DialContext, error) {
 		Outbound: []*core.OutboundHandlerConfig{{
 			ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
 				Server: &protocol.ServerEndpoint{
-					Address: net2.NewIPOrDomain(net2.ParseAddress(n.host)),
+					Address: net.NewIPOrDomain(net.ParseAddress(n.host)),
 					Port:    uint32(n.port),
 					User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
 						CipherType: n.cipher,
@@ -67,19 +66,7 @@ func (n *Node) DialContext(ctx context.Context) (common.DialContext, error) {
 		}},
 	}
 
-	instance, err := core.NewWithContext(ctx, &config)
-	if err != nil {
-		return nil, fmt.Errorf("init instance: %w", err)
-	}
-
-	dialContext := func(ctx context.Context, network, addr string) (net.Conn, error) {
-		dest, err := net2.ParseDestination(network + ":" + addr)
-		if err != nil {
-			return nil, err
-		}
-		return core.Dial(ctx, instance, dest)
-	}
-	return dialContext, nil
+	return common.NewDialContext(ctx, &config)
 }
 
 func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
@@ -98,7 +85,7 @@ func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
 		Outbound: []*core.OutboundHandlerConfig{{
 			ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
 				Server: &protocol.ServerEndpoint{
-					Address: net2.NewIPOrDomain(net2.ParseAddress(n.host)),
+					Address: net.NewIPOrDomain(net.ParseAddress(n.host)),
 					Port:    uint32(n.port),
 					User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
 						CipherType: n.cipher,
@@ -109,8 +96,8 @@ func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
 		}},
 		Inbound: []*core.InboundHandlerConfig{{
 			ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{
-				PortList: &net2.PortList{Range: []*net2.PortRange{net2.SinglePortRange(net2.Port(port))}},
-				Listen:   net2.NewIPOrDomain(net2.LocalHostIP),
+				PortList: &net.PortList{Range: []*net.PortRange{net.SinglePortRange(net.Port(port))}},
+				Listen:   net.NewIPOrDomain(net.LocalHostIP),
 			}),
 			ProxySettings: serial.ToTypedMessage(&http.ServerConfig{UserLevel: 0}),
 		}},
