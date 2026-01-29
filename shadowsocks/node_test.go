@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/ctykk/go-xray/shadowsocks"
@@ -12,20 +11,8 @@ import (
 	_ "github.com/xtls/xray-core/main/distro/all"
 )
 
-var (
-	gctx    context.Context
-	gcancel context.CancelFunc
-)
-
-func TestMain(m *testing.M) {
-	gctx, gcancel = context.WithCancel(context.Background())
-	defer gcancel()
-
-	os.Exit(m.Run())
-}
-
 func TestNode_DialContext(t *testing.T) {
-	ctx, cancel := context.WithCancel(gctx)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	node, err := shadowsocks.New("localhost", 42665, shadowsocks.CipherAES256GCM, "123456", "TestNode_DialContext")
@@ -48,7 +35,7 @@ func TestNode_DialContext(t *testing.T) {
 }
 
 func TestNode_HTTPProxy(t *testing.T) {
-	ctx, cancel := context.WithCancel(gctx)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	node, err := shadowsocks.New("localhost", 42665, shadowsocks.CipherAES256GCM, "123456", "TestNode_DialContext")
