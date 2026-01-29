@@ -6,6 +6,7 @@ A proxy client library built on [Xray-core](https://github.com/xtls/xray-core).
 
 - Currently supported proxy types:
   - Shadowsocks
+  - Vmess
 - Usage modes:
   - DialContext
   - HTTPProxy
