@@ -4,12 +4,10 @@ import (
 	"context"
 
 	"github.com/ctykk/go-xray/common"
-	"github.com/xtls/xray-core/app/proxyman"
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/protocol"
 	"github.com/xtls/xray-core/common/serial"
 	"github.com/xtls/xray-core/core"
-	"github.com/xtls/xray-core/proxy/http"
 	"github.com/xtls/xray-core/proxy/shadowsocks"
 )
 
@@ -71,13 +69,5 @@ func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
 		}),
 	}}
 
-	config.Inbound = []*core.InboundHandlerConfig{{
-		ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{
-			PortList: &net.PortList{Range: []*net.PortRange{net.SinglePortRange(net.Port(port))}},
-			Listen:   net.NewIPOrDomain(net.LocalHostIP),
-		}),
-		ProxySettings: serial.ToTypedMessage(&http.ServerConfig{UserLevel: 0}),
-	}}
-
-	return common.NewHTTPProxy(ctx, config)
+	return common.NewHTTPProxy(ctx, config, port)
 }
