@@ -18,11 +18,12 @@ import (
 	"github.com/xtls/xray-core/proxy/shadowsocks"
 )
 
+// Node shadowsocks
 type Node struct {
-	host       string                 // Server host
-	port       uint16                 // Server port
-	cipherType shadowsocks.CipherType // Encryption method
-	password   string                 // Encryption password
+	host     string                 // Server host
+	port     uint16                 // Server port
+	cipher   shadowsocks.CipherType // Encryption method
+	password string                 // Encryption password
 
 	Name string // Node display name
 }
@@ -33,23 +34,23 @@ const (
 )
 
 // New creates a Shadowsocks node from raw config values.
-func New(host string, port uint16, cipherType string, password string, name string) (*Node, error) {
+func New(host string, port uint16, cipher string, password string, name string) (*Node, error) {
 	// cipher type
 	var ct shadowsocks.CipherType
-	switch strings.ToUpper(cipherType) {
+	switch strings.ToUpper(cipher) {
 	case CipherNameAES128GCM:
 		ct = shadowsocks.CipherType_AES_128_GCM
 	case CipherNameAES256GCM:
 		ct = shadowsocks.CipherType_AES_256_GCM
 	default:
-		return nil, fmt.Errorf("unknown cipher type: %s", cipherType)
+		return nil, fmt.Errorf("unknown cipher: %s", cipher)
 	}
 
 	node := Node{
-		host:       host,
-		port:       port,
-		cipherType: ct,
-		password:   password,
+		host:     host,
+		port:     port,
+		cipher:   ct,
+		password: password,
 
 		Name: name,
 	}
@@ -75,7 +76,7 @@ func (n *Node) DialContext(ctx context.Context) (common.DialContext, error) {
 					Address: net2.NewIPOrDomain(net2.ParseAddress(n.host)),
 					Port:    uint32(n.port),
 					User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-						CipherType: n.cipherType,
+						CipherType: n.cipher,
 						Password:   n.password,
 					})},
 				},
@@ -117,7 +118,7 @@ func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
 					Address: net2.NewIPOrDomain(net2.ParseAddress(n.host)),
 					Port:    uint32(n.port),
 					User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-						CipherType: n.cipherType,
+						CipherType: n.cipher,
 						Password:   n.password,
 					})},
 				},
