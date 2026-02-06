@@ -8,6 +8,7 @@ import (
 )
 
 // TODO: 添加流量统计功能
+// TODO: 优化架构
 
 // Proxy is the interface for a proxy service.
 type Proxy interface {
