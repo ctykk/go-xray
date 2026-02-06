@@ -20,23 +20,23 @@ type Stats struct {
 // NOTE: https://deepwiki.com/search/-xraycore-go-go-import-githubc_0921d0e3-36b5-4bf3-aaef-a31dd6df0664
 
 const (
-	outboundUplinkName   = "outbound>>>>>>traffic>>>uplink"
-	outboundDownlinkName = "outbound>>>>>>traffic>>>downlink"
+	outboundUplinkName   = "outbound>>>outbound-tag>>>traffic>>>uplink"
+	outboundDownlinkName = "outbound>>>outbound-tag>>>traffic>>>downlink"
 )
 
 func (i *Instance) Stats() (Stats, error) {
-	if !i.IsStarted() {
-		return Stats{}, errors.New("not started")
-	}
+	// if !i.IsStarted() {
+	// 	return Stats{}, errors.New("not started")
+	// }
 
 	// 获取统计管理器
-	statsManager, ok := i.inst.GetFeature(stats.ManagerType()).(stats.Manager)
+	statsManager, ok := i.Inst.GetFeature(stats.ManagerType()).(stats.Manager)
 	if !ok || statsManager == nil {
 		return Stats{}, errors.New("no stats manager")
 	}
 
 	// 获取策略管理器
-	policyManager, ok := i.inst.GetFeature(policy.ManagerType()).(policy.Manager)
+	policyManager, ok := i.Inst.GetFeature(policy.ManagerType()).(policy.Manager)
 	if !ok || policyManager == nil {
 		return Stats{}, errors.New("no policy manager")
 	}

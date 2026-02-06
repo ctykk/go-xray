@@ -13,7 +13,7 @@ import (
 
 type Instance struct {
 	ctx  context.Context
-	inst *core.Instance
+	Inst *core.Instance
 }
 
 func New(ctx context.Context, cfg *core.Config) (*Instance, error) {
@@ -24,10 +24,10 @@ func New(ctx context.Context, cfg *core.Config) (*Instance, error) {
 
 	return &Instance{
 		ctx:  ctx,
-		inst: inst,
+		Inst: inst,
 	}, nil
 }
 
-func (i *Instance) Start() error    { return i.inst.Start() }
-func (i *Instance) IsStarted() bool { return i.inst.IsRunning() }
-func (i *Instance) Stop() error     { return i.inst.Close() }
+func (i *Instance) Start() error    { return i.Inst.Start() }
+func (i *Instance) IsStarted() bool { return i.Inst.IsRunning() }
+func (i *Instance) Stop() error     { return i.Inst.Close() }

@@ -27,6 +27,8 @@ type Node struct {
 func New(host string, port uint16, cipher Cipher, password string, name string) (*Node, error) {
 	config := common.NewConfig()
 	config.Outbound = []*core.OutboundHandlerConfig{{
+		// NOTE: 不添加 Tag 的话，Stats 拿不到 Counter
+		Tag: "outbound-tag",
 		ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
 			Server: &protocol.ServerEndpoint{
 				Address: net.NewIPOrDomain(net.ParseAddress(host)),

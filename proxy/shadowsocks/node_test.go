@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/ctykk/go-xray/proxy/shadowsocks"
 	"github.com/go-resty/resty/v2"
@@ -27,11 +28,14 @@ func TestNode_DialContext(t *testing.T) {
 
 	client := resty.New().SetTransport(&http.Transport{DialContext: dialer})
 
-	resp, err := client.R().Get("https://bing.com")
-	if err != nil {
-		t.Fatalf("%+v", err)
+	for range 10 {
+		time.Sleep(1 * time.Second)
+		resp, err := client.R().Get("https://bing.com")
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		t.Logf("status code: %d", resp.StatusCode())
 	}
-	t.Logf("status code: %d", resp.StatusCode())
 }
 
 func TestNode_HTTPProxy(t *testing.T) {

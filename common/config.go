@@ -28,8 +28,8 @@ func NewConfig() *core.Config {
 			serial.ToTypedMessage(&policy.Config{
 				System: &policy.SystemPolicy{
 					Stats: &policy.SystemPolicy_Stats{
-						InboundUplink:   true,
-						InboundDownlink: true,
+						OutboundUplink:   true,
+						OutboundDownlink: true,
 					},
 				},
 			}),
