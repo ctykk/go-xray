@@ -12,6 +12,7 @@ import (
 )
 
 func NewHTTPProxy(ctx context.Context, config *core.Config, port uint16) error {
+	// FIXME: 这会导致 config 被修改，改成拷贝一个 config 或者将 Node 里的 config 字段改为构造 config 的函数
 	// add inbound config
 	config.Inbound = []*core.InboundHandlerConfig{{
 		ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{
