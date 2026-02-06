@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ctykk/go-xray/shadowsocks"
+	"github.com/ctykk/go-xray/proxy/shadowsocks"
 	"github.com/go-resty/resty/v2"
 	_ "github.com/xtls/xray-core/main/distro/all"
 )
