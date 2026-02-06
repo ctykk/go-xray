@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ctykk/go-xray/vmess"
+	"github.com/ctykk/go-xray/proxy/vmess"
 	"github.com/go-resty/resty/v2"
 	_ "github.com/xtls/xray-core/main/distro/all"
 )
