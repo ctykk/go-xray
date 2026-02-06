@@ -3,7 +3,9 @@ package common
 import (
 	"github.com/xtls/xray-core/app/dispatcher"
 	"github.com/xtls/xray-core/app/log"
+	"github.com/xtls/xray-core/app/policy"
 	"github.com/xtls/xray-core/app/proxyman"
+	"github.com/xtls/xray-core/app/stats"
 	"github.com/xtls/xray-core/common/serial"
 	"github.com/xtls/xray-core/core"
 )
@@ -19,6 +21,17 @@ func NewConfig() *core.Config {
 			serial.ToTypedMessage(&log.Config{
 				AccessLogType: log.LogType_None,
 				ErrorLogType:  log.LogType_None,
+			}),
+
+			// enable traffic stats
+			serial.ToTypedMessage(&stats.Config{}),
+			serial.ToTypedMessage(&policy.Config{
+				System: &policy.SystemPolicy{
+					Stats: &policy.SystemPolicy_Stats{
+						InboundUplink:   true,
+						InboundDownlink: true,
+					},
+				},
 			}),
 		},
 	}

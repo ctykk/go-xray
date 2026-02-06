@@ -7,6 +7,8 @@ import (
 	_ "github.com/xtls/xray-core/main/distro/all"
 )
 
+// TODO: 添加流量统计功能
+
 // Proxy is the interface for a proxy service.
 type Proxy interface {
 	// DialContext returns a function to establish connections through the proxy.
