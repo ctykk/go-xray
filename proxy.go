@@ -2,8 +2,8 @@ package xray
 
 import (
 	"context"
+	"net"
 
-	"github.com/ctykk/go-xray/common"
 	_ "github.com/xtls/xray-core/main/distro/all"
 )
 
@@ -16,7 +16,7 @@ type Proxy interface {
 	//  transport := &http.Transport{DialContext: dialer}
 	//  client := &http.Client{Transport: transport}
 	//  resp, _ := client.Get("https://www.bing.com")
-	DialContext(ctx context.Context) (common.DialContext, error)
+	DialContext(ctx context.Context) (func(ctx context.Context, network, address string) (net.Conn, error), error)
 
 	// HTTPProxy starts an HTTP proxy server on the given port.
 	//
