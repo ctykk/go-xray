@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ctykk/go-xray/common"
+	"github.com/ctykk/go-xray/internal/config"
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/protocol"
 	"github.com/xtls/xray-core/common/serial"
@@ -19,8 +20,18 @@ type Node struct {
 	password string // Encryption password
 
 	Name string // Node display name
+}
 
-	config *core.Config
+func (n *Node) App() []*serial.TypedMessage { return config.CommonApp() }
+
+func (n *Node) Inbound() []*core.InboundHandlerConfig {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (n *Node) Outbound() []*core.OutboundHandlerConfig {
+	// TODO implement me
+	panic("implement me")
 }
 
 // New creates a Shadowsocks node from raw config values.
