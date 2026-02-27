@@ -16,25 +16,14 @@ import (
 )
 
 type Trojan struct {
-	host     string
-	port     uint16
-	password string
-
-	Name string
-
+	Name          string
 	ConfigBuilder func() core.Config
 }
 
 func New(host string, port uint16, password string, name string) (*Trojan, error) {
-	node := Trojan{
-		host:     host,
-		port:     port,
-		password: password,
+	node := Trojan{Name: name}
 
-		Name: name,
-	}
-
-	configBuilder := func() core.Config {
+	node.ConfigBuilder = func() core.Config {
 		return core.Config{
 			App: []*serial.TypedMessage{
 				serial.ToTypedMessage(&dispatcher.Config{}),
@@ -50,17 +39,16 @@ func New(host string, port uint16, password string, name string) (*Trojan, error
 			Outbound: []*core.OutboundHandlerConfig{{
 				ProxySettings: serial.ToTypedMessage(&trojan.ClientConfig{
 					Server: &protocol.ServerEndpoint{
-						Address: net.NewIPOrDomain(net.ParseAddress(node.host)),
-						Port:    uint32(node.port),
+						Address: net.NewIPOrDomain(net.ParseAddress(host)),
+						Port:    uint32(port),
 						User: &protocol.User{Account: serial.ToTypedMessage(&trojan.Account{
-							Password: node.password,
+							Password: password,
 						})},
 					},
 				}),
 			}},
 		}
 	}
-	node.ConfigBuilder = configBuilder
 
 	return &node, nil
 }
@@ -86,6 +74,11 @@ func (n *Trojan) DialContext(ctx context.Context) (func(context.Context, string,
 
 		return conn, nil
 	}
+
+	go func() {
+		<-ctx.Done()
+		_ = inst.Close()
+	}()
 
 	return dc, nil
 }
