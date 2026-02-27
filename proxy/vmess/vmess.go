@@ -53,11 +53,11 @@ func New(host string, port uint16, cipher Cipher, uuid string, name string) (*Vm
 			Outbound: []*core.OutboundHandlerConfig{{
 				ProxySettings: serial.ToTypedMessage(&outbound.Config{
 					Receiver: &protocol.ServerEndpoint{
-						Address: net.NewIPOrDomain(net.ParseAddress(host)),
-						Port:    uint32(port),
+						Address: net.NewIPOrDomain(net.ParseAddress(node.host)),
+						Port:    uint32(node.port),
 						User: &protocol.User{Account: serial.ToTypedMessage(&vmess.Account{
-							Id:               uuid,
-							SecuritySettings: &protocol.SecurityConfig{Type: cipher},
+							Id:               node.uuid,
+							SecuritySettings: &protocol.SecurityConfig{Type: node.cipher},
 						})},
 					},
 				}),
