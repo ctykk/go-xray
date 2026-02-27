@@ -43,8 +43,7 @@ func New(host string, port uint16, uuid string, encryption string, name string) 
 						Address: net.NewIPOrDomain(net.ParseAddress(host)),
 						Port:    uint32(port),
 						User: &protocol.User{Account: serial.ToTypedMessage(&vless.Account{
-							Id: uuid,
-							// TODO: support encryption
+							Id:         uuid,
 							Encryption: encryption,
 						})},
 					},

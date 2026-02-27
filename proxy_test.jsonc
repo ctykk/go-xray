@@ -35,8 +35,8 @@
             "level": 0
           }
         ],
-        // TODO: only support "none" now
-        "decryption": "none"
+        // "decryption": "none"
+        "decryption": "mlkem768x25519plus.native.600s.PMigsYLGaV2jWmBl4bIKk7bq8G0rVjPxunzXCa1_hhDs4TZ_35hXOMbX3pcLOP0Ua_13hOyg3fTFuzlv8r2sUw"
       }
     },
     {
