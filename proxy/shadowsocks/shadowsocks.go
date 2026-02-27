@@ -53,11 +53,11 @@ func New(host string, port uint16, cipher Cipher, password string, name string) 
 			Outbound: []*core.OutboundHandlerConfig{{
 				ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
 					Server: &protocol.ServerEndpoint{
-						Address: net.NewIPOrDomain(net.ParseAddress(host)),
-						Port:    uint32(port),
+						Address: net.NewIPOrDomain(net.ParseAddress(node.host)),
+						Port:    uint32(node.port),
 						User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-							CipherType: cipher,
-							Password:   password,
+							CipherType: node.cipher,
+							Password:   node.password,
 						})},
 					},
 				}),
