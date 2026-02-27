@@ -15,30 +15,15 @@ import (
 	"github.com/xtls/xray-core/proxy/shadowsocks"
 )
 
-// Node shadowsocks
-type Node struct {
-	host     string // Server host
-	port     uint16 // Server port
-	cipher   Cipher // Encryption method
-	password string // Encryption password
-
-	Name string // Node display name
-
+type Shadowsocks struct {
+	Name          string
 	ConfigBuilder func() core.Config
 }
 
-// New creates a Shadowsocks node from raw config values.
-func New(host string, port uint16, cipher Cipher, password string, name string) (*Node, error) {
-	node := Node{
-		host:     host,
-		port:     port,
-		cipher:   cipher,
-		password: password,
+func New(host string, port uint16, cipher Cipher, password string, name string) (*Shadowsocks, error) {
+	node := Shadowsocks{Name: name}
 
-		Name: name,
-	}
-
-	configBuilder := func() core.Config {
+	node.ConfigBuilder = func() core.Config {
 		return core.Config{
 			App: []*serial.TypedMessage{
 				serial.ToTypedMessage(&dispatcher.Config{}),
@@ -64,15 +49,13 @@ func New(host string, port uint16, cipher Cipher, password string, name string) 
 				}),
 			}},
 		}
-
 	}
-	node.ConfigBuilder = configBuilder
 
 	return &node, nil
 }
 
-func (n *Node) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
-	cfg := n.ConfigBuilder()
+func (s *Shadowsocks) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
+	cfg := s.ConfigBuilder()
 
 	inst, err := core.NewWithContext(ctx, &cfg)
 	if err != nil {
@@ -93,11 +76,16 @@ func (n *Node) DialContext(ctx context.Context) (func(context.Context, string, s
 		return conn, nil
 	}
 
+	go func() {
+		<-ctx.Done()
+		_ = inst.Close()
+	}()
+
 	return dc, nil
 }
 
-func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
-	cfg := n.ConfigBuilder()
+func (s *Shadowsocks) HTTPProxy(ctx context.Context, port uint16) error {
+	cfg := s.ConfigBuilder()
 
 	cfg.Inbound = []*core.InboundHandlerConfig{{
 		ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{

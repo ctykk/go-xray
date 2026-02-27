@@ -13,14 +13,14 @@ import (
 var ssURLRe = regexp.MustCompile(`^ss://([A-Za-z0-9]+)@([a-z0-9.]+?\.[a-z]+?):(\d{1,5})#(.*?)$`)
 
 // FromBase64 parses shadowsocks nodes from a base64 encoded list
-func FromBase64(b64 string) ([]Node, error) {
+func FromBase64(b64 string) ([]Shadowsocks, error) {
 	decoded, err := base64.StdEncoding.DecodeString(b64)
 	if err != nil {
 		return nil, fmt.Errorf("b64 decode: %w", err)
 	}
 
 	// key as "host:port"
-	nodes := make(map[string]Node)
+	nodes := make(map[string]Shadowsocks)
 
 	for _, line := range strings.Split(string(decoded), "\n") {
 		line = strings.TrimRight(line, "\r")
@@ -29,6 +29,9 @@ func FromBase64(b64 string) ([]Node, error) {
 		if match == nil {
 			continue
 		}
+
+		// host
+		host := match[2]
 
 		// port
 		port, err := strconv.Atoi(match[3])
@@ -49,6 +52,7 @@ func FromBase64(b64 string) ([]Node, error) {
 		if err != nil {
 			continue
 		}
+		password := authSplit[1]
 
 		// name
 		name, err := url.QueryUnescape(match[4])
@@ -56,18 +60,18 @@ func FromBase64(b64 string) ([]Node, error) {
 			continue
 		}
 
-		node, err := New(match[2], uint16(port), cipher, authSplit[1], name)
+		node, err := New(host, uint16(port), cipher, password, name)
 		if err != nil {
 			continue
 		}
-		nodes[fmt.Sprintf("%s:%d", strings.ToLower(node.host), node.port)] = *node
+		nodes[fmt.Sprintf("%s:%d", strings.ToLower(host), port)] = *node
 	}
 
 	if len(nodes) == 0 {
 		return nil, fmt.Errorf("no nodes found")
 	}
 
-	result := make([]Node, 0, len(nodes))
+	result := make([]Shadowsocks, 0, len(nodes))
 	for _, node := range nodes {
 		result = append(result, node)
 	}

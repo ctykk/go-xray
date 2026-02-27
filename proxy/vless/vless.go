@@ -1,4 +1,4 @@
-package vmess
+package vless
 
 import (
 	"context"
@@ -12,31 +12,17 @@ import (
 	"github.com/xtls/xray-core/common/serial"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/proxy/http"
-	"github.com/xtls/xray-core/proxy/vmess"
-	"github.com/xtls/xray-core/proxy/vmess/outbound"
+	"github.com/xtls/xray-core/proxy/vless"
+	"github.com/xtls/xray-core/proxy/vless/outbound"
 )
 
-// Node vmess
-type Node struct {
-	host   string
-	port   uint16
-	cipher Cipher
-	uuid   string
-
-	Name string
-
+type Vless struct {
+	Name          string
 	ConfigBuilder func() core.Config
 }
 
-func New(host string, port uint16, cipher Cipher, uuid string, name string) (*Node, error) {
-	node := Node{
-		host:   host,
-		port:   port,
-		cipher: cipher,
-		uuid:   uuid,
-
-		Name: name,
-	}
+func New(host string, port uint16, uuid string, encryption string, name string) (*Vless, error) {
+	node := Vless{Name: name}
 
 	configBuilder := func() core.Config {
 		return core.Config{
@@ -53,12 +39,13 @@ func New(host string, port uint16, cipher Cipher, uuid string, name string) (*No
 
 			Outbound: []*core.OutboundHandlerConfig{{
 				ProxySettings: serial.ToTypedMessage(&outbound.Config{
-					Receiver: &protocol.ServerEndpoint{
+					Vnext: &protocol.ServerEndpoint{
 						Address: net.NewIPOrDomain(net.ParseAddress(host)),
 						Port:    uint32(port),
-						User: &protocol.User{Account: serial.ToTypedMessage(&vmess.Account{
-							Id:               uuid,
-							SecuritySettings: &protocol.SecurityConfig{Type: cipher},
+						User: &protocol.User{Account: serial.ToTypedMessage(&vless.Account{
+							Id: uuid,
+							// TODO: support encryption
+							Encryption: encryption,
 						})},
 					},
 				}),
@@ -70,7 +57,7 @@ func New(host string, port uint16, cipher Cipher, uuid string, name string) (*No
 	return &node, nil
 }
 
-func (n *Node) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
+func (n *Vless) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
 	cfg := n.ConfigBuilder()
 
 	inst, err := core.NewWithContext(ctx, &cfg)
@@ -78,7 +65,7 @@ func (n *Node) DialContext(ctx context.Context) (func(context.Context, string, s
 		return nil, fmt.Errorf("new instance: %w", err)
 	}
 
-	dc := func(ctx context.Context, network, addr string) (net.Conn, error) {
+	dc := func(ctx context.Context, network string, addr string) (net.Conn, error) {
 		dest, err := net.ParseDestination(network + ":" + addr)
 		if err != nil {
 			return nil, err
@@ -92,10 +79,15 @@ func (n *Node) DialContext(ctx context.Context) (func(context.Context, string, s
 		return conn, nil
 	}
 
+	go func() {
+		<-ctx.Done()
+		_ = inst.Close()
+	}()
+
 	return dc, nil
 }
 
-func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
+func (n *Vless) HTTPProxy(ctx context.Context, port uint16) error {
 	cfg := n.ConfigBuilder()
 
 	cfg.Inbound = []*core.InboundHandlerConfig{{
