@@ -16,8 +16,7 @@ import (
 	"github.com/xtls/xray-core/proxy/vmess/outbound"
 )
 
-// Node vmess
-type Node struct {
+type Vmess struct {
 	host   string
 	port   uint16
 	cipher Cipher
@@ -28,8 +27,8 @@ type Node struct {
 	ConfigBuilder func() core.Config
 }
 
-func New(host string, port uint16, cipher Cipher, uuid string, name string) (*Node, error) {
-	node := Node{
+func New(host string, port uint16, cipher Cipher, uuid string, name string) (*Vmess, error) {
+	node := Vmess{
 		host:   host,
 		port:   port,
 		cipher: cipher,
@@ -70,7 +69,7 @@ func New(host string, port uint16, cipher Cipher, uuid string, name string) (*No
 	return &node, nil
 }
 
-func (n *Node) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
+func (n *Vmess) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
 	cfg := n.ConfigBuilder()
 
 	inst, err := core.NewWithContext(ctx, &cfg)
@@ -95,7 +94,7 @@ func (n *Node) DialContext(ctx context.Context) (func(context.Context, string, s
 	return dc, nil
 }
 
-func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
+func (n *Vmess) HTTPProxy(ctx context.Context, port uint16) error {
 	cfg := n.ConfigBuilder()
 
 	cfg.Inbound = []*core.InboundHandlerConfig{{
