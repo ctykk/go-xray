@@ -10,6 +10,7 @@ import (
 	"github.com/ctykk/go-xray"
 	"github.com/ctykk/go-xray/proxy/shadowsocks"
 	"github.com/ctykk/go-xray/proxy/trojan"
+	"github.com/ctykk/go-xray/proxy/vless"
 	"github.com/ctykk/go-xray/proxy/vmess"
 	"github.com/go-resty/resty/v2"
 )
@@ -38,6 +39,13 @@ func TestDialContext(t *testing.T) {
 		t.Fatalf("%+v", err)
 	}
 	pps = append(pps, ProxyPort{Proxy: tr, Name: "trojan"})
+
+	// vless
+	vl, err := vless.New("localhost", 39573, "433d0d23-d443-5212-a0df-cdbdd2d53015", "none", "")
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+	pps = append(pps, ProxyPort{Proxy: vl, Name: "vless"})
 
 	// vmess
 	vm, err := vmess.New("localhost", 39574, vmess.CipherAES128GCM, "433d0d23-d443-5212-a0df-cdbdd2d53015", "")
@@ -81,6 +89,13 @@ func TestHTTPProxy(t *testing.T) {
 		t.Fatalf("%+v", err)
 	}
 	pps = append(pps, ProxyPort{Proxy: tr, Name: "trojan"})
+
+	// vless
+	vl, err := vless.New("localhost", 39573, "433d0d23-d443-5212-a0df-cdbdd2d53015", "none", "")
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+	pps = append(pps, ProxyPort{Proxy: vl, Name: "vless"})
 
 	// vmess
 	vm, err := vmess.New("localhost", 39574, vmess.CipherAES128GCM, "433d0d23-d443-5212-a0df-cdbdd2d53015", "")

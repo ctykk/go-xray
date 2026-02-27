@@ -25,6 +25,21 @@
       }
     },
     {
+      "tag": "in-vless",
+      "port": 39573,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "433d0d23-d443-5212-a0df-cdbdd2d53015",
+            "level": 0
+          }
+        ],
+        // TODO: only support "none" now
+        "decryption": "none"
+      }
+    },
+    {
       "tag": "in-vmess",
       "port": 39574,
       "protocol": "vmess",
@@ -50,6 +65,7 @@
         "inboundTag": [
           "in-shadowsocks",
           "in-trojan",
+          "in-vless",
           "in-vmess"
         ],
         "outboundTag": "out-freedom"
