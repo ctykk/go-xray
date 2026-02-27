@@ -17,25 +17,12 @@ import (
 )
 
 type Vmess struct {
-	host   string
-	port   uint16
-	cipher Cipher
-	uuid   string
-
-	Name string
-
+	Name          string
 	ConfigBuilder func() core.Config
 }
 
 func New(host string, port uint16, cipher Cipher, uuid string, name string) (*Vmess, error) {
-	node := Vmess{
-		host:   host,
-		port:   port,
-		cipher: cipher,
-		uuid:   uuid,
-
-		Name: name,
-	}
+	node := Vmess{Name: name}
 
 	configBuilder := func() core.Config {
 		return core.Config{
@@ -53,11 +40,11 @@ func New(host string, port uint16, cipher Cipher, uuid string, name string) (*Vm
 			Outbound: []*core.OutboundHandlerConfig{{
 				ProxySettings: serial.ToTypedMessage(&outbound.Config{
 					Receiver: &protocol.ServerEndpoint{
-						Address: net.NewIPOrDomain(net.ParseAddress(node.host)),
-						Port:    uint32(node.port),
+						Address: net.NewIPOrDomain(net.ParseAddress(host)),
+						Port:    uint32(port),
 						User: &protocol.User{Account: serial.ToTypedMessage(&vmess.Account{
-							Id:               node.uuid,
-							SecuritySettings: &protocol.SecurityConfig{Type: node.cipher},
+							Id:               uuid,
+							SecuritySettings: &protocol.SecurityConfig{Type: cipher},
 						})},
 					},
 				}),
@@ -69,8 +56,8 @@ func New(host string, port uint16, cipher Cipher, uuid string, name string) (*Vm
 	return &node, nil
 }
 
-func (n *Vmess) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
-	cfg := n.ConfigBuilder()
+func (v *Vmess) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
+	cfg := v.ConfigBuilder()
 
 	inst, err := core.NewWithContext(ctx, &cfg)
 	if err != nil {
@@ -91,11 +78,16 @@ func (n *Vmess) DialContext(ctx context.Context) (func(context.Context, string, 
 		return conn, nil
 	}
 
+	go func() {
+		<-ctx.Done()
+		_ = inst.Close()
+	}()
+
 	return dc, nil
 }
 
-func (n *Vmess) HTTPProxy(ctx context.Context, port uint16) error {
-	cfg := n.ConfigBuilder()
+func (v *Vmess) HTTPProxy(ctx context.Context, port uint16) error {
+	cfg := v.ConfigBuilder()
 
 	cfg.Inbound = []*core.InboundHandlerConfig{{
 		ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{
