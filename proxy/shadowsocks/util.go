@@ -30,6 +30,9 @@ func FromBase64(b64 string) ([]Shadowsocks, error) {
 			continue
 		}
 
+		// host
+		host := match[2]
+
 		// port
 		port, err := strconv.Atoi(match[3])
 		if err != nil {
@@ -49,6 +52,7 @@ func FromBase64(b64 string) ([]Shadowsocks, error) {
 		if err != nil {
 			continue
 		}
+		password := authSplit[1]
 
 		// name
 		name, err := url.QueryUnescape(match[4])
@@ -56,11 +60,11 @@ func FromBase64(b64 string) ([]Shadowsocks, error) {
 			continue
 		}
 
-		node, err := New(match[2], uint16(port), cipher, authSplit[1], name)
+		node, err := New(host, uint16(port), cipher, password, name)
 		if err != nil {
 			continue
 		}
-		nodes[fmt.Sprintf("%s:%d", strings.ToLower(node.host), node.port)] = *node
+		nodes[fmt.Sprintf("%s:%d", strings.ToLower(host), port)] = *node
 	}
 
 	if len(nodes) == 0 {

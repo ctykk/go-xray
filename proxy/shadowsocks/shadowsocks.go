@@ -16,28 +16,14 @@ import (
 )
 
 type Shadowsocks struct {
-	host     string // Server host
-	port     uint16 // Server port
-	cipher   Cipher // Encryption method
-	password string // Encryption password
-
-	Name string // Shadowsocks display name
-
+	Name          string
 	ConfigBuilder func() core.Config
 }
 
-// New creates a Shadowsocks node from raw config values.
 func New(host string, port uint16, cipher Cipher, password string, name string) (*Shadowsocks, error) {
-	node := Shadowsocks{
-		host:     host,
-		port:     port,
-		cipher:   cipher,
-		password: password,
+	node := Shadowsocks{Name: name}
 
-		Name: name,
-	}
-
-	configBuilder := func() core.Config {
+	node.ConfigBuilder = func() core.Config {
 		return core.Config{
 			App: []*serial.TypedMessage{
 				serial.ToTypedMessage(&dispatcher.Config{}),
@@ -53,25 +39,23 @@ func New(host string, port uint16, cipher Cipher, password string, name string) 
 			Outbound: []*core.OutboundHandlerConfig{{
 				ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
 					Server: &protocol.ServerEndpoint{
-						Address: net.NewIPOrDomain(net.ParseAddress(node.host)),
-						Port:    uint32(node.port),
+						Address: net.NewIPOrDomain(net.ParseAddress(host)),
+						Port:    uint32(port),
 						User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-							CipherType: node.cipher,
-							Password:   node.password,
+							CipherType: cipher,
+							Password:   password,
 						})},
 					},
 				}),
 			}},
 		}
-
 	}
-	node.ConfigBuilder = configBuilder
 
 	return &node, nil
 }
 
-func (n *Shadowsocks) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
-	cfg := n.ConfigBuilder()
+func (s *Shadowsocks) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
+	cfg := s.ConfigBuilder()
 
 	inst, err := core.NewWithContext(ctx, &cfg)
 	if err != nil {
@@ -92,11 +76,16 @@ func (n *Shadowsocks) DialContext(ctx context.Context) (func(context.Context, st
 		return conn, nil
 	}
 
+	go func() {
+		<-ctx.Done()
+		_ = inst.Close()
+	}()
+
 	return dc, nil
 }
 
-func (n *Shadowsocks) HTTPProxy(ctx context.Context, port uint16) error {
-	cfg := n.ConfigBuilder()
+func (s *Shadowsocks) HTTPProxy(ctx context.Context, port uint16) error {
+	cfg := s.ConfigBuilder()
 
 	cfg.Inbound = []*core.InboundHandlerConfig{{
 		ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{
