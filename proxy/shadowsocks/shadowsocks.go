@@ -15,21 +15,20 @@ import (
 	"github.com/xtls/xray-core/proxy/shadowsocks"
 )
 
-// Node shadowsocks
-type Node struct {
+type Shadowsocks struct {
 	host     string // Server host
 	port     uint16 // Server port
 	cipher   Cipher // Encryption method
 	password string // Encryption password
 
-	Name string // Node display name
+	Name string // Shadowsocks display name
 
 	ConfigBuilder func() core.Config
 }
 
 // New creates a Shadowsocks node from raw config values.
-func New(host string, port uint16, cipher Cipher, password string, name string) (*Node, error) {
-	node := Node{
+func New(host string, port uint16, cipher Cipher, password string, name string) (*Shadowsocks, error) {
+	node := Shadowsocks{
 		host:     host,
 		port:     port,
 		cipher:   cipher,
@@ -71,7 +70,7 @@ func New(host string, port uint16, cipher Cipher, password string, name string) 
 	return &node, nil
 }
 
-func (n *Node) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
+func (n *Shadowsocks) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
 	cfg := n.ConfigBuilder()
 
 	inst, err := core.NewWithContext(ctx, &cfg)
@@ -96,7 +95,7 @@ func (n *Node) DialContext(ctx context.Context) (func(context.Context, string, s
 	return dc, nil
 }
 
-func (n *Node) HTTPProxy(ctx context.Context, port uint16) error {
+func (n *Shadowsocks) HTTPProxy(ctx context.Context, port uint16) error {
 	cfg := n.ConfigBuilder()
 
 	cfg.Inbound = []*core.InboundHandlerConfig{{
