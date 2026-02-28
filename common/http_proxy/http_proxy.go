@@ -15,6 +15,7 @@ import (
 func CommonHTTPProxy(ctx context.Context, cfg *config.Config, port uint16) error {
 	cfg = cfg.Clone()
 
+	// add http inbound handler
 	cfg.CoreConfig.Inbound = []*core.InboundHandlerConfig{{
 		ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{
 			PortList: &net.PortList{Range: []*net.PortRange{net.SinglePortRange(net.Port(port))}},
