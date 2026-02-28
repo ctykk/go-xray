@@ -40,8 +40,8 @@ func New(host string, port uint16, uuid string, encryption string, name string) 
 	}, nil
 }
 
-func (n *Vless) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
-	return dial_context.DialContext(ctx, n.Config)
+func (n *Vless) DialContext(ctx context.Context) (dial_context.DialContext, error) {
+	return dial_context.CommonDialContext(ctx, n.Config)
 }
 
 func (n *Vless) HTTPProxy(ctx context.Context, port uint16) error {

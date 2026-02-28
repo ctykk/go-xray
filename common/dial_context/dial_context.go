@@ -9,7 +9,9 @@ import (
 	"github.com/xtls/xray-core/core"
 )
 
-func DialContext(ctx context.Context, cfg *config.Config) (func(context.Context, string, string) (net.Conn, error), error) {
+type DialContext = func(ctx context.Context, network, address string) (net.Conn, error)
+
+func CommonDialContext(ctx context.Context, cfg *config.Config) (DialContext, error) {
 	cfg = cfg.Clone()
 
 	inst, err := core.NewWithContext(ctx, cfg.CoreConfig)

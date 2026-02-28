@@ -39,8 +39,8 @@ func New(host string, port uint16, cipher Cipher, password string, name string) 
 	}, nil
 }
 
-func (s *Shadowsocks) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
-	return dial_context.DialContext(ctx, s.Config)
+func (s *Shadowsocks) DialContext(ctx context.Context) (dial_context.DialContext, error) {
+	return dial_context.CommonDialContext(ctx, s.Config)
 }
 
 func (s *Shadowsocks) HTTPProxy(ctx context.Context, port uint16) error {

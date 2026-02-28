@@ -38,8 +38,8 @@ func New(host string, port uint16, password string, name string) (*Trojan, error
 	}, nil
 }
 
-func (n *Trojan) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
-	return dial_context.DialContext(ctx, n.Config)
+func (n *Trojan) DialContext(ctx context.Context) (dial_context.DialContext, error) {
+	return dial_context.CommonDialContext(ctx, n.Config)
 }
 
 func (n *Trojan) HTTPProxy(ctx context.Context, port uint16) error {

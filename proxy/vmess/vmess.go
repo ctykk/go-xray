@@ -40,8 +40,8 @@ func New(host string, port uint16, cipher Cipher, uuid string, name string) (*Vm
 	}, nil
 }
 
-func (v *Vmess) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
-	return dial_context.DialContext(ctx, v.Config)
+func (v *Vmess) DialContext(ctx context.Context) (dial_context.DialContext, error) {
+	return dial_context.CommonDialContext(ctx, v.Config)
 }
 
 func (v *Vmess) HTTPProxy(ctx context.Context, port uint16) error {
