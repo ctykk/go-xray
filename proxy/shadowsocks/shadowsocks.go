@@ -2,113 +2,47 @@ package shadowsocks
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/xtls/xray-core/app/dispatcher"
-	"github.com/xtls/xray-core/app/log"
-	"github.com/xtls/xray-core/app/proxyman"
+	"github.com/ctykk/go-xray/common/config"
+	"github.com/ctykk/go-xray/common/dial_context"
+	"github.com/ctykk/go-xray/common/http_proxy"
 	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/protocol"
 	"github.com/xtls/xray-core/common/serial"
 	"github.com/xtls/xray-core/core"
-	"github.com/xtls/xray-core/proxy/http"
 	"github.com/xtls/xray-core/proxy/shadowsocks"
 )
 
 type Shadowsocks struct {
-	Name          string
-	ConfigBuilder func() core.Config
+	Name   string
+	Config *config.Config
 }
 
 func New(host string, port uint16, cipher Cipher, password string, name string) (*Shadowsocks, error) {
-	node := Shadowsocks{Name: name}
-
-	node.ConfigBuilder = func() core.Config {
-		return core.Config{
-			App: []*serial.TypedMessage{
-				serial.ToTypedMessage(&dispatcher.Config{}),
-				serial.ToTypedMessage(&proxyman.InboundConfig{}),
-				serial.ToTypedMessage(&proxyman.OutboundConfig{}),
-
-				serial.ToTypedMessage(&log.Config{
-					AccessLogType: log.LogType_None,
-					ErrorLogType:  log.LogType_None,
-				}),
+	cfg := config.DefaultConfig()
+	cfg.CoreConfig.Outbound = []*core.OutboundHandlerConfig{{
+		ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
+			Server: &protocol.ServerEndpoint{
+				Address: net.NewIPOrDomain(net.ParseAddress(host)),
+				Port:    uint32(port),
+				User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
+					CipherType: cipher,
+					Password:   password,
+				})},
 			},
+		}),
+	}}
 
-			Outbound: []*core.OutboundHandlerConfig{{
-				ProxySettings: serial.ToTypedMessage(&shadowsocks.ClientConfig{
-					Server: &protocol.ServerEndpoint{
-						Address: net.NewIPOrDomain(net.ParseAddress(host)),
-						Port:    uint32(port),
-						User: &protocol.User{Account: serial.ToTypedMessage(&shadowsocks.Account{
-							CipherType: cipher,
-							Password:   password,
-						})},
-					},
-				}),
-			}},
-		}
-	}
-
-	return &node, nil
+	return &Shadowsocks{
+		Name:   name,
+		Config: cfg,
+	}, nil
 }
 
-func (s *Shadowsocks) DialContext(ctx context.Context) (func(context.Context, string, string) (net.Conn, error), error) {
-	cfg := s.ConfigBuilder()
-
-	inst, err := core.NewWithContext(ctx, &cfg)
-	if err != nil {
-		return nil, fmt.Errorf("new instance: %w", err)
-	}
-
-	dc := func(ctx context.Context, network, addr string) (net.Conn, error) {
-		dest, err := net.ParseDestination(network + ":" + addr)
-		if err != nil {
-			return nil, err
-		}
-
-		conn, err := core.Dial(ctx, inst, dest)
-		if err != nil {
-			return nil, err
-		}
-
-		return conn, nil
-	}
-
-	go func() {
-		<-ctx.Done()
-		_ = inst.Close()
-	}()
-
-	return dc, nil
+func (s *Shadowsocks) DialContext(ctx context.Context) (dial_context.DialContext, error) {
+	return dial_context.CommonDialContext(ctx, s.Config)
 }
 
 func (s *Shadowsocks) HTTPProxy(ctx context.Context, port uint16) error {
-	cfg := s.ConfigBuilder()
-
-	cfg.Inbound = []*core.InboundHandlerConfig{{
-		ReceiverSettings: serial.ToTypedMessage(&proxyman.ReceiverConfig{
-			PortList: &net.PortList{Range: []*net.PortRange{net.SinglePortRange(net.Port(port))}},
-			Listen:   net.NewIPOrDomain(net.LocalHostIP),
-		}),
-		ProxySettings: serial.ToTypedMessage(&http.ServerConfig{}),
-	}}
-
-	inst, err := core.NewWithContext(ctx, &cfg)
-	if err != nil {
-		return fmt.Errorf("new instance: %w", err)
-	}
-
-	err = inst.Start()
-	if err != nil {
-		return fmt.Errorf("start instance: %w", err)
-	}
-
-	go func() {
-		<-ctx.Done()
-		_ = inst.Close()
-	}()
-
-	return nil
+	return http_proxy.CommonHTTPProxy(ctx, s.Config, port)
 }
