@@ -44,5 +44,5 @@ func (s *Shadowsocks) DialContext(ctx context.Context) (dial_context.DialContext
 }
 
 func (s *Shadowsocks) HTTPProxy(ctx context.Context, port uint16) error {
-	return http_proxy.HTTPProxy(ctx, s.Config, port)
+	return http_proxy.CommonHTTPProxy(ctx, s.Config, port)
 }

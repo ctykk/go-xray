@@ -12,7 +12,7 @@ import (
 	"github.com/xtls/xray-core/proxy/http"
 )
 
-func HTTPProxy(ctx context.Context, cfg *config.Config, port uint16) error {
+func CommonHTTPProxy(ctx context.Context, cfg *config.Config, port uint16) error {
 	cfg = cfg.Clone()
 
 	cfg.CoreConfig.Inbound = []*core.InboundHandlerConfig{{

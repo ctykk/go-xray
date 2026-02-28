@@ -45,5 +45,5 @@ func (v *Vmess) DialContext(ctx context.Context) (dial_context.DialContext, erro
 }
 
 func (v *Vmess) HTTPProxy(ctx context.Context, port uint16) error {
-	return http_proxy.HTTPProxy(ctx, v.Config, port)
+	return http_proxy.CommonHTTPProxy(ctx, v.Config, port)
 }

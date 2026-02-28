@@ -43,5 +43,5 @@ func (n *Trojan) DialContext(ctx context.Context) (dial_context.DialContext, err
 }
 
 func (n *Trojan) HTTPProxy(ctx context.Context, port uint16) error {
-	return http_proxy.HTTPProxy(ctx, n.Config, port)
+	return http_proxy.CommonHTTPProxy(ctx, n.Config, port)
 }

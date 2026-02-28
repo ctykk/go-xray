@@ -45,5 +45,5 @@ func (n *Vless) DialContext(ctx context.Context) (dial_context.DialContext, erro
 }
 
 func (n *Vless) HTTPProxy(ctx context.Context, port uint16) error {
-	return http_proxy.HTTPProxy(ctx, n.Config, port)
+	return http_proxy.CommonHTTPProxy(ctx, n.Config, port)
 }
