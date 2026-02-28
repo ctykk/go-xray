@@ -13,14 +13,17 @@ type Config struct {
 	CoreConfig *core.Config
 }
 
+// DefaultConfig returns a default Config
 func DefaultConfig() *Config {
 	cfg := &Config{
 		CoreConfig: &core.Config{
 			App: []*serial.TypedMessage{
+				// necessary
 				serial.ToTypedMessage(&dispatcher.Config{}),
 				serial.ToTypedMessage(&proxyman.InboundConfig{}),
 				serial.ToTypedMessage(&proxyman.OutboundConfig{}),
 
+				// diable log
 				serial.ToTypedMessage(&log.Config{
 					AccessLogType: log.LogType_None,
 					ErrorLogType:  log.LogType_None,
@@ -31,6 +34,7 @@ func DefaultConfig() *Config {
 	return cfg
 }
 
+// Clone returns a deep copy of the Config.
 func (c *Config) Clone() *Config {
 	newC := &Config{}
 	newC.CoreConfig = proto.Clone(c.CoreConfig).(*core.Config)
