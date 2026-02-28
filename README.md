@@ -7,6 +7,8 @@ A proxy client library built on [Xray-core](https://github.com/xtls/xray-core).
 - Currently supported proxy types:
   - Shadowsocks
   - Vmess
+  - Trojan
+  - Vless
 - Usage modes:
   - DialContext
   - HTTPProxy
@@ -25,10 +27,10 @@ The `DialContext` method creates a custom dialer function that can be integrated
 
 ```go
 // Create a Shadowsocks node
-node, _ := shadowsocks.New("your-server.com", 1234, "aes-256-gcm", "your-password", "node-name")
+proxy, _ := shadowsocks.New("your-server.com", 1234, shadowsocks.CipherAES256GCM, "your-password", "proxy-name")
 
 // Get a dialer function
-dialer, _ := node.DialContext(ctx)
+dialer, _ := proxy.DialContext(ctx)
 
 // Make requests through the proxy
 resp, _ := resty.New().SetTransport(&http.Transport{DialContext: dialer}).
@@ -41,14 +43,13 @@ The `HTTPProxy` method starts a local HTTP proxy server that forwards traffic th
 
 ```go
 // Create a Shadowsocks node
-node, _ := shadowsocks.New("your-server.com", 1234, "aes-256-gcm", "your-password", "node-name")
+proxy, _ := shadowsocks.New("your-server.com", 1234, shadowsocks.CipherAES256GCM, "your-password", "proxy-name")
 
 // Start HTTP proxy on local port 11234
-port := uint16(11234)
-_ = node.HTTPProxy(ctx, port)
+_ = proxy.HTTPProxy(ctx, uint16(11234))
 
 // Make requests through the proxy
-resp, _ := resty.New().SetProxy(fmt.Sprintf("http://localhost:%d", port)).
+resp, _ := resty.New().SetProxy(fmt.Sprintf("http://127.0.0.1:%d", port)).
     R().Get("https://example.com")
 ```
 
