@@ -59,6 +59,7 @@ func TestDialContext(t *testing.T) {
 		dialer, err := p.Proxy.DialContext(ctx)
 		if err != nil {
 			t.Errorf("%s: %+v", p.Name, err)
+			continue
 		}
 
 		client := resty.New().SetTransport(&http.Transport{DialContext: dialer})
@@ -66,6 +67,7 @@ func TestDialContext(t *testing.T) {
 		_, err = client.R().Get("https://bing.com")
 		if err != nil {
 			t.Errorf("%s: %+v", p.Name, err)
+			continue
 		}
 		t.Logf("%s: success", p.Name)
 	}
@@ -111,6 +113,7 @@ func TestHTTPProxy(t *testing.T) {
 		err = p.Proxy.HTTPProxy(ctx, port)
 		if err != nil {
 			t.Errorf("%s: %+v", p.Name, err)
+			continue
 		}
 
 		client := resty.New().SetProxy(fmt.Sprintf("http://localhost:%d", port))
@@ -118,6 +121,7 @@ func TestHTTPProxy(t *testing.T) {
 		_, err = client.R().Get("https://bing.com")
 		if err != nil {
 			t.Errorf("%s: %+v", p.Name, err)
+			continue
 		}
 		t.Logf("%s: success", p.Name)
 	}
