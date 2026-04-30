@@ -57,7 +57,12 @@
       "port": 39575,
       "protocol": "hysteria",
       "settings": {
-        "version": 2
+        "version": 2,
+        "clients": [
+          {
+            "auth": "f773eee7-5be8-4191-bc7c-cdb84bb01802"
+          }
+        ]
       }
     }
   ],

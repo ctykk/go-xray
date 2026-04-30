@@ -57,7 +57,7 @@ func TestDialContext(t *testing.T) {
 	pps = append(pps, ProxyPort{Proxy: vm, Name: "vmess"})
 
 	// hysteria
-	hs, err := hysteria.New("localhost", 39575, "")
+	hs, err := hysteria.New("localhost", 39575, "f773eee7-5be8-4191-bc7c-cdb84bb01802", "")
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -117,7 +117,7 @@ func TestHTTPProxy(t *testing.T) {
 	pps = append(pps, ProxyPort{Proxy: vm, Name: "vmess"})
 
 	// hysteria
-	hs, err := hysteria.New("localhost", 39575, "")
+	hs, err := hysteria.New("localhost", 39575, "f773eee7-5be8-4191-bc7c-cdb84bb01802", "")
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}

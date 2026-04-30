@@ -11,6 +11,7 @@ import (
 	"github.com/xtls/xray-core/common/serial"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/proxy/hysteria"
+	"github.com/xtls/xray-core/proxy/hysteria/account"
 )
 
 type Hysteria struct {
@@ -18,13 +19,17 @@ type Hysteria struct {
 	Config *config.Config
 }
 
-func New(host string, port uint16, name string) (*Hysteria, error) {
+func New(host string, port uint16, password string, name string) (*Hysteria, error) {
+	// fixme: support mihomo: ports mport udp skip-cert-verify sni
 	cfg := config.DefaultConfig()
 	cfg.CoreConfig.Outbound = []*core.OutboundHandlerConfig{{
 		ProxySettings: serial.ToTypedMessage(&hysteria.ClientConfig{
 			Server: &protocol.ServerEndpoint{
 				Address: net.NewIPOrDomain(net.ParseAddress(host)),
 				Port:    uint32(port),
+				User: &protocol.User{Account: serial.ToTypedMessage(&account.Account{
+					Auth: password,
+				})},
 			},
 			Version: 2,
 		}),
