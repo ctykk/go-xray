@@ -51,6 +51,14 @@
           }
         ]
       }
+    },
+    {
+      "tag": "in-hysteria",
+      "port": 39575,
+      "protocol": "hysteria",
+      "settings": {
+        "version": 2
+      }
     }
   ],
   "outbounds": [
@@ -66,7 +74,8 @@
           "in-shadowsocks",
           "in-trojan",
           "in-vless",
-          "in-vmess"
+          "in-vmess",
+          "in-hysteria"
         ],
         "outboundTag": "out-freedom"
       }

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/ctykk/go-xray"
+	"github.com/ctykk/go-xray/proxy/hysteria"
 	"github.com/ctykk/go-xray/proxy/shadowsocks"
 	"github.com/ctykk/go-xray/proxy/trojan"
 	"github.com/ctykk/go-xray/proxy/vless"
@@ -54,6 +55,13 @@ func TestDialContext(t *testing.T) {
 		t.Fatalf("%+v", err)
 	}
 	pps = append(pps, ProxyPort{Proxy: vm, Name: "vmess"})
+
+	// hysteria
+	hs, err := hysteria.New("localhost", 39575, "")
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+	pps = append(pps, ProxyPort{Proxy: hs, Name: "hysteria"})
 
 	for _, p := range pps {
 		dialer, err := p.Proxy.DialContext(ctx)
@@ -107,6 +115,13 @@ func TestHTTPProxy(t *testing.T) {
 		t.Fatalf("%+v", err)
 	}
 	pps = append(pps, ProxyPort{Proxy: vm, Name: "vmess"})
+
+	// hysteria
+	hs, err := hysteria.New("localhost", 39575, "")
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+	pps = append(pps, ProxyPort{Proxy: hs, Name: "hysteria"})
 
 	for _, p := range pps {
 		port := uint16(10000 + rand.UintN(55535))
